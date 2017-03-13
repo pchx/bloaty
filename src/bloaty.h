@@ -53,6 +53,11 @@ enum class DataSource {
   kSymbols,
 };
 
+enum class RollupFormat {
+  kText,
+  kJSON,
+};
+
 class InputFile {
  public:
   InputFile(const std::string& filename) : filename_(filename) {}
@@ -371,9 +376,13 @@ struct RollupRow {
 
 struct RollupOutput {
  public:
-  RollupOutput() : toplevel_row_("TOTAL") {}
+  RollupOutput() : toplevel_row_("TOTAL"), format_(RollupFormat::kText) {}
   const RollupRow& toplevel_row() { return toplevel_row_; }
   void Print(std::ostream* out) const;
+
+  void set_format(RollupFormat format) {
+    format_ = format;
+  }
 
  private:
   BLOATY_DISALLOW_COPY_AND_ASSIGN(RollupOutput);
@@ -381,6 +390,7 @@ struct RollupOutput {
 
   size_t longest_label_;
   RollupRow toplevel_row_;
+  RollupFormat format_;
 
   void PrintRow(const RollupRow& row, size_t indent, std::ostream* out) const;
   void PrintTree(const RollupRow& row, size_t indent, std::ostream* out) const;

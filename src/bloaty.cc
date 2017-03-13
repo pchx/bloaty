@@ -786,6 +786,25 @@ void RollupOutput::PrintRow(const RollupRow& row, size_t indent,
 
 void RollupOutput::PrintTree(const RollupRow& row, size_t indent,
                              std::ostream* out) const {
+  if (format_ == RollupFormat::kJSON) {
+    const std::string prefix = FixedWidthString("", indent);
+    *out << prefix << "{\n"
+         << prefix << "  'data': { '$area': " << row.filesize << " },\n"
+         << prefix << "  'name': '" << row.name << " "
+         << SiPrint(row.vmsize, false) << " VM / "
+         << SiPrint(row.filesize, false) << " FILE" << "',\n";
+    if (row.sorted_children.size() > 0) {
+      *out << prefix << "  'children': [\n";
+      for (const auto& child : row.sorted_children) {
+        PrintTree(child, indent + 2, out);
+        *out << ",\n";
+      }
+      *out << prefix << "  ]\n";
+    }
+    *out << prefix << "}";
+    return;
+  }
+
   // Rows are printed before their sub-rows.
   PrintRow(row, indent, out);
 
@@ -816,6 +835,12 @@ void RollupOutput::PrintTree(const RollupRow& row, size_t indent,
 }
 
 void RollupOutput::Print(std::ostream* out) const {
+  if (format_ == RollupFormat::kJSON) {
+    *out << "var kTree = ";
+    PrintTree(toplevel_row_, 0, out);
+    return;
+  }
+
   *out << "     VM SIZE    ";
   PrintSpaces(longest_label_, out);
   *out << "    FILE SIZE";
@@ -1536,6 +1561,7 @@ USAGE: bloaty [options] file... [-- base_file...]
 Options:
 
   -d <sources>     Comma-separated list of sources to scan.
+  -j               JSON output suitable for use with webtreemap.
   -n <num>         How many rows to show per level before collapsing
                    other keys into '[Other]'.  Set to '0' for unlimited.
                    Defaults to 20.
@@ -1594,6 +1620,8 @@ bool BloatyMain(int argc, char* argv[], const InputFileFactory& file_factory,
       for (const auto& name : names) {
         CHECK_RETURN(bloaty.AddDataSource(name));
       }
+    } else if (strcmp(argv[i], "-j") == 0) {
+      output->set_format(RollupFormat::kJSON);
     } else if (strcmp(argv[i], "-r") == 0) {
       std::string source_name, regex, substitution;
       if (!RE2::FullMatch(argv[++i], regex_pattern,
