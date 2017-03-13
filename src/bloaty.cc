@@ -1599,7 +1599,7 @@ bool BloatyMain(int argc, char* argv[], const InputFileFactory& file_factory,
       if (!RE2::FullMatch(argv[++i], regex_pattern,
                           &source_name, &regex, &substitution)) {
         std::cerr << "Bad format for regex, should be: "
-                  << "source+=/pattern/replacement/\n";
+                  << "source:s/pattern/replacement/\n";
         return false;
       }
 
