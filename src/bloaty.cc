@@ -84,7 +84,7 @@ constexpr DataSourceDefinition data_sources[] = {
 #define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
 
 const char* GetDataSourceLabel(DataSource source) {
-  for (int i = 0; i < ARRAY_SIZE(data_sources); i++) {
+  for (size_t i = 0; i < ARRAY_SIZE(data_sources); i++) {
     if (data_sources[i].number == source) {
       return data_sources[i].name;
     }
@@ -715,7 +715,7 @@ std::string DoubleStringPrintf(const char *fmt, double d) {
 std::string SiPrint(ssize_t size, bool force_sign) {
   const char *prefixes[] = {"", "Ki", "Mi", "Gi", "Ti"};
   size_t num_prefixes = 5;
-  int n = 0;
+  size_t n = 0;
   double size_d = size;
   while (fabs(size_d) > 1024 && n < num_prefixes - 2) {
     size_d /= 1024;
@@ -1550,6 +1550,7 @@ Options:
   -v               Verbose output.  Dumps warnings encountered during
                    processing and full VM/file maps at the end.
                    Add more v's (-vv, -vvv) for even more.
+  -w               Wide output; don't truncate long labels.
   --help           Display this message and exit.
   --list-sources   Show a list of available sources and exit.
 )";
@@ -1637,6 +1638,8 @@ bool BloatyMain(int argc, char* argv[], const InputFileFactory& file_factory,
       verbose_level = 2;
     } else if (strcmp(argv[i], "-vvv") == 0) {
       verbose_level = 3;
+    } else if (strcmp(argv[i], "-w") == 0) {
+      max_label_len = SIZE_MAX;
     } else if (strcmp(argv[i], "--list-sources") == 0) {
       bloaty.PrintDataSources();
       return false;
