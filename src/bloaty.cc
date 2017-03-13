@@ -743,7 +743,7 @@ std::string SiPrint(ssize_t size, bool force_sign) {
     }
   }
 
-  return LeftPad(ret, 7);
+  return ret;
 }
 
 std::string PercentString(double percent, bool diff_mode) {
@@ -778,9 +778,9 @@ void RollupOutput::PrintRow(const RollupRow& row, size_t indent,
                             std::ostream* out) const {
   *out << FixedWidthString("", indent) << " "
        << PercentString(row.vmpercent, row.diff_mode) << " "
-       << SiPrint(row.vmsize, row.diff_mode) << " "
+       << LeftPad(SiPrint(row.vmsize, row.diff_mode), 7) << " "
        << FixedWidthString(row.name, longest_label_) << " "
-       << SiPrint(row.filesize, row.diff_mode) << " "
+       << LeftPad(SiPrint(row.filesize, row.diff_mode), 7) << " "
        << PercentString(row.filepercent, row.diff_mode) << "\n";
 }
 
